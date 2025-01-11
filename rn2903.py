@@ -9,7 +9,7 @@ from typing import Self, Optional
 __author__ = "Matteo Golin"
 
 BAUD_RATE: int = 57600 # Baud rate of the RN2903
-MAX_TIMEOUT: "4294967245"
+MAX_TIMEOUT: str =  "4294967245"
 
 class RN2903:
     """Represents the RN2903 radio module."""
@@ -17,7 +17,7 @@ class RN2903:
     def __init__(self, serial_port: str) -> None:
 
         """
-        Constructs a new instance of the PygmyGS.
+        Constructs a new instance of the RN2903 radio module.
         `serial_port`: The string representing the serial port of the PygmyGS (i.e. /dev/ttyUSB0)
         """
 
