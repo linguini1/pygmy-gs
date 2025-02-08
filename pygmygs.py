@@ -22,3 +22,11 @@ class PygmyGS:
         """
 
         return self.radio.receive()
+
+    def transmit(self, data: bytes) -> bool:
+        """
+        Transmit data over the radio.
+        Returns false on failure, true otherwise.
+        """
+
+        return self.radio.transmit(data)

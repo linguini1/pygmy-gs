@@ -9,7 +9,11 @@ def main() -> None:
         raise ValueError("Please provide the serial port of the RN2903 (i.e. /dev/ttyUSB0, COM2, etc.)")
 
     gs = PygmyGS(sys.argv[1])
-    print(gs.receive())
+
+    gs.transmit("Hello".encode('ascii'))
+
+    # while True:
+    #     print(gs.receive())
 
 if __name__ == "__main__":
     main()

@@ -65,6 +65,23 @@ class RN2903:
         data = self.serial.readline().decode("ascii")[8:].strip()
         return bytes.fromhex(data)
 
+    def transmit(self, data: bytes) -> bool:
+        """
+        Transmit the data over radio.
+        Returns true if successful, returns false if failure.
+        """
+
+        if not self.__mac_pause():
+            return False
+
+        self.__write(f"radio tx {data.hex()}")
+        if not self.__wait_for_ok():
+            return False
+
+        line = str(self.serial.readline())
+        if "radio_tx_ok" not in line:
+            return False
+
     def snr(self) -> int:
         """
         Gets the SNR from the radio module.
