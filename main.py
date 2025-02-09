@@ -10,10 +10,11 @@ def main() -> None:
 
     gs = PygmyGS(sys.argv[1])
 
-    gs.transmit("Hello".encode('ascii'))
+    message = "Did you get this?"
+    gs.transmit(message.encode('ascii'))
 
-    # while True:
-    #     print(gs.receive())
+    while True:
+        print(gs.receive())
 
 if __name__ == "__main__":
     main()

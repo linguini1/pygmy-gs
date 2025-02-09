@@ -62,8 +62,11 @@ class RN2903:
 
         # Have to convert from ASCII hex representation (i.e. 0xDEADBEEF) into actual bytes
 
-        data = self.serial.readline().decode("ascii")[8:].strip()
-        return bytes.fromhex(data)
+        data = self.serial.readline()
+        if "radio_err" in str(data):
+            return None
+
+        return bytes.fromhex(data.decode("ascii")[8:].strip())
 
     def transmit(self, data: bytes) -> bool:
         """
