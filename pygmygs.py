@@ -1,7 +1,10 @@
-from rn2903 import RN2903
+from rn2903 import RN2903, RadioConfig
 from typing import Self, Optional
+import struct
 
 __author__ = "Matteo Golin"
+
+CALLSIGN_LEN: int = 6
 
 class PygmyGS:
 
@@ -13,7 +16,7 @@ class PygmyGS:
 
         self.radio = RN2903(serial_port=serial_port)
 
-    def receive(self) -> Optional[bytes]:
+    def receive(self) -> Optional[tuple[str, int, bytes]]:
 
         """
         Puts the ground station in continuous receive mode until data is received, at which point the data is
@@ -21,7 +24,13 @@ class PygmyGS:
         If entering receive mode fails or times out, None is returned.
         """
 
-        return self.radio.receive()
+        data = self.radio.receive()
+        if data is None:
+            return None
+
+        callsign = data[0:CALLSIGN_LEN].decode('ascii')
+        count: int = struct.unpack("B", data[CALLSIGN_LEN:CALLSIGN_LEN + 1])[0]
+        return (callsign, count,data[CALLSIGN_LEN + 1:])
 
     def transmit(self, data: bytes) -> bool:
         """
@@ -30,3 +39,7 @@ class PygmyGS:
         """
 
         return self.radio.transmit(data)
+
+    def configure(self, config: RadioConfig) -> bool:
+        """Configure the ground station radio."""
+        return self.radio.configure(config)

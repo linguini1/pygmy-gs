@@ -4,12 +4,24 @@ reference: https://ww1.microchip.com/downloads/en/DeviceDoc/40001811A.pdf
 """
 
 from serial import Serial
-from typing import Self, Optional
+from typing import Self, Optional, Literal
+from dataclasses import dataclass
 
 __author__ = "Matteo Golin"
 
 BAUD_RATE: int = 57600 # Baud rate of the RN2903
-MAX_TIMEOUT: str =  "4294967245"
+MAX_TIMEOUT: str = "4294967245"
+
+@dataclass
+class RadioConfig:
+    """Configuration options for the RN2903."""
+    frequency: int
+    bandwidth: int
+    prlen: int
+    spread: int
+    mod: Literal["lora"] | Literal["fsk"]
+    txpower: int
+
 
 class RN2903:
     """Represents the RN2903 radio module."""
@@ -99,3 +111,32 @@ class RN2903:
 
         self.__write("sys get ver")
         return self.serial.readline().decode("ascii").strip()
+
+    def configure(self, config: RadioConfig) -> bool:
+        """Configure the radio."""
+
+        self.__write(f"radio set freq {config.frequency}")
+        if not self.__wait_for_ok():
+            return False
+
+        self.__write(f"radio set mod {config.mod}")
+        if not self.__wait_for_ok():
+            return False
+
+        self.__write(f"radio set prlen {config.prlen}")
+        if not self.__wait_for_ok():
+            return False
+
+        self.__write(f"radio set sf sf{config.spread}")
+        if not self.__wait_for_ok():
+            return False
+
+        self.__write(f"radio set pwr {config.txpower}")
+        if not self.__wait_for_ok():
+            return False
+
+        self.__write(f"radio set bw {config.bandwidth}")
+        if not self.__wait_for_ok():
+            return False
+
+        return True
