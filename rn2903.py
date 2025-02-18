@@ -15,12 +15,13 @@ MAX_TIMEOUT: str = "4294967245"
 @dataclass
 class RadioConfig:
     """Configuration options for the RN2903."""
-    frequency: int
-    bandwidth: int
-    prlen: int
-    spread: int
-    mod: Literal["lora"] | Literal["fsk"]
-    txpower: int
+
+    frequency: Optional[int] = None
+    bandwidth: Optional[int] = None
+    prlen: Optional[int] = None
+    spread: Optional[int] = None
+    mod: Optional[Literal["lora"] | Literal["fsk"]] = None
+    txpower: Optional[int] = None
 
 
 class RN2903:
@@ -115,28 +116,34 @@ class RN2903:
     def configure(self, config: RadioConfig) -> bool:
         """Configure the radio."""
 
-        self.__write(f"radio set freq {config.frequency}")
-        if not self.__wait_for_ok():
-            return False
+        if config.frequency is not None:
+            self.__write(f"radio set freq {config.frequency}")
+            if not self.__wait_for_ok():
+                return False
 
-        self.__write(f"radio set mod {config.mod}")
-        if not self.__wait_for_ok():
-            return False
+        if config.mod is not None:
+            self.__write(f"radio set mod {config.mod}")
+            if not self.__wait_for_ok():
+                return False
 
-        self.__write(f"radio set prlen {config.prlen}")
-        if not self.__wait_for_ok():
-            return False
+        if config.prlen is not None:
+            self.__write(f"radio set prlen {config.prlen}")
+            if not self.__wait_for_ok():
+                return False
 
-        self.__write(f"radio set sf sf{config.spread}")
-        if not self.__wait_for_ok():
-            return False
+        if config.spread is not None:
+            self.__write(f"radio set sf sf{config.spread}")
+            if not self.__wait_for_ok():
+                return False
 
-        self.__write(f"radio set pwr {config.txpower}")
-        if not self.__wait_for_ok():
-            return False
+        if config.txpower is not None:
+            self.__write(f"radio set pwr {config.txpower}")
+            if not self.__wait_for_ok():
+                return False
 
-        self.__write(f"radio set bw {config.bandwidth}")
-        if not self.__wait_for_ok():
-            return False
+        if config.bandwidth is not None:
+            self.__write(f"radio set bw {config.bandwidth}")
+            if not self.__wait_for_ok():
+                return False
 
         return True

@@ -8,16 +8,11 @@ def main() -> None:
     if len(sys.argv) < 2:
         raise ValueError("Please provide the serial port of the RN2903 (i.e. /dev/ttyUSB0, COM2, etc.)")
 
-    config = RadioConfig(
-        frequency = 902000000,
-        mod = "lora",
-        prlen = 6,
-        spread = 7,
-        bandwidth = 125,
-        txpower = 20,
-    )
-
     gs = PygmyGS(sys.argv[1])
+
+    config = RadioConfig(
+        mod = "lora",
+    )
 
     if not gs.configure(config):
         print("Couldn't configure radio.")
