@@ -6,6 +6,7 @@ __author__ = "Matteo Golin"
 
 CALLSIGN_LEN: int = 6
 
+
 class PygmyGS:
 
     def __init__(self, serial_port: str) -> None:
@@ -17,7 +18,6 @@ class PygmyGS:
         self.radio = RN2903(serial_port=serial_port)
 
     def receive(self) -> Optional[tuple[str, int, bytes]]:
-
         """
         Puts the ground station in continuous receive mode until data is received, at which point the data is
         returned in binary format.
@@ -28,9 +28,9 @@ class PygmyGS:
         if data is None:
             return None
 
-        callsign = data[0:CALLSIGN_LEN].decode('ascii')
-        count: int = struct.unpack("B", data[CALLSIGN_LEN:CALLSIGN_LEN + 1])[0]
-        return (callsign, count,data[CALLSIGN_LEN + 1:])
+        callsign = data[0:CALLSIGN_LEN].decode("ascii")
+        count: int = struct.unpack("<B", data[CALLSIGN_LEN : CALLSIGN_LEN + 1])[0]
+        return (callsign, count, data[CALLSIGN_LEN + 1 :])
 
     def transmit(self, data: bytes) -> bool:
         """
