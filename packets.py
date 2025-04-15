@@ -1,6 +1,6 @@
 import struct
 from enum import IntEnum
-from typing import Protocol, Self, Iterable
+from typing import Protocol, Self
 from dataclasses import dataclass
 
 
@@ -113,7 +113,7 @@ class AccelerationBlock:
     def from_bytes(cls, data: bytes) -> Self:
         """Constructs an acceleration data block from bytes."""
 
-        time, x, y, z = struct.unpack("<Ihhh", data[:8])
+        time, x, y, z = struct.unpack("<Ihhh", data[:10])
 
         return cls(
             time=time,
@@ -141,7 +141,7 @@ class GyroBlock:
     def from_bytes(cls, data: bytes) -> Self:
         """Constructs a gyroscope data block from bytes."""
 
-        time, x, y, z = struct.unpack("<Ihhh", data[:8])
+        time, x, y, z = struct.unpack("<Ihhh", data[:10])
 
         return cls(
             time=time,
@@ -169,7 +169,7 @@ class MagBlock:
     def from_bytes(cls, data: bytes) -> Self:
         """Constructs a magnetometer data block from bytes."""
 
-        time, x, y, z = struct.unpack("<Ihhh", data[:8])
+        time, x, y, z = struct.unpack("<Ihhh", data[:10])
 
         return cls(
             time=time,
@@ -219,7 +219,6 @@ class PacketParser:
 
         # Remove bytes just parsed
         self._packet = self._packet[block.size() :]
-        print(len(self._packet))
         return block
 
 
