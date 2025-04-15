@@ -11,9 +11,9 @@ class BlockType(IntEnum):
     TEMP = 0x1
     ALT = 0x2
     COORDS = 0x3
-    ACCEL = 0x3
-    GYRO = 0x3
-    MAG = 0x3
+    ACCEL = 0x4
+    GYRO = 0x5
+    MAG = 0x6
 
 
 class Block(Protocol):
