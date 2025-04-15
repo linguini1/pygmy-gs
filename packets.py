@@ -11,6 +11,9 @@ class BlockType(IntEnum):
     TEMP = 0x1
     ALT = 0x2
     COORDS = 0x3
+    ACCEL = 0x3
+    GYRO = 0x3
+    MAG = 0x3
 
 
 class Block(Protocol):
@@ -71,6 +74,114 @@ class TemperatureBlock:
         return 8
 
 
+@dataclass
+class AltitudeBlock:
+    """
+    Represents an altitude block containing altitude data.
+    """
+
+    time: int
+    altitude: int  # Altitude above sea level in cm
+
+    @classmethod
+    def from_bytes(cls, data: bytes) -> Self:
+        """Constructs an altitude data block from bytes."""
+
+        time, altitude = struct.unpack("<Ii", data[:8])
+
+        return cls(
+            time=time,
+            altitude=altitude,
+        )
+
+    def size(self) -> int:
+        return 8
+
+
+@dataclass
+class AccelerationBlock:
+    """
+    Represents an acceleration block containing linear acceleration data.
+    """
+
+    time: int
+    x: int  # Acceleration in X in cm/s^2
+    y: int  # Acceleration in Y in cm/s^2
+    z: int  # Acceleration in Z in cm/s^2
+
+    @classmethod
+    def from_bytes(cls, data: bytes) -> Self:
+        """Constructs an acceleration data block from bytes."""
+
+        time, x, y, z = struct.unpack("<Ihhh", data[:8])
+
+        return cls(
+            time=time,
+            x=x,
+            y=y,
+            z=z,
+        )
+
+    def size(self) -> int:
+        return 10
+
+
+@dataclass
+class GyroBlock:
+    """
+    Represents a gyroscope block containing angular velocity data.
+    """
+
+    time: int
+    x: int  # Angular velocity in X in 0.1dps
+    y: int  # Angular velocity in Y in 0.1dps
+    z: int  # Angular velocity in Z in 0.1dps
+
+    @classmethod
+    def from_bytes(cls, data: bytes) -> Self:
+        """Constructs a gyroscope data block from bytes."""
+
+        time, x, y, z = struct.unpack("<Ihhh", data[:8])
+
+        return cls(
+            time=time,
+            x=x,
+            y=y,
+            z=z,
+        )
+
+    def size(self) -> int:
+        return 10
+
+
+@dataclass
+class MagBlock:
+    """
+    Represents a magnetometer block containing magnetic field data.
+    """
+
+    time: int
+    x: int  # Magnetic field in X in 0.1dps
+    y: int  # Magnetic field in Y in 0.1dps
+    z: int  # Magnetic field in Z in 0.1dps
+
+    @classmethod
+    def from_bytes(cls, data: bytes) -> Self:
+        """Constructs a magnetometer data block from bytes."""
+
+        time, x, y, z = struct.unpack("<Ihhh", data[:8])
+
+        return cls(
+            time=time,
+            x=x,
+            y=y,
+            z=z,
+        )
+
+    def size(self) -> int:
+        return 10
+
+
 class PacketParser:
     """Parses a packet into its blocks. Intended to be iterated over."""
 
@@ -95,6 +206,14 @@ class PacketParser:
                 block = PressureBlock.from_bytes(self._packet)
             case BlockType.TEMP:
                 block = TemperatureBlock.from_bytes(self._packet)
+            case BlockType.ALT:
+                block = AltitudeBlock.from_bytes(self._packet)
+            case BlockType.ACCEL:
+                block = AccelerationBlock.from_bytes(self._packet)
+            case BlockType.GYRO:
+                block = GyroBlock.from_bytes(self._packet)
+            case BlockType.MAG:
+                block = MagBlock.from_bytes(self._packet)
             case _:
                 raise ValueError("Block type not implemented")
 
