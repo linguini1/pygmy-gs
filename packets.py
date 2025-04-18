@@ -14,6 +14,7 @@ class BlockType(IntEnum):
     ACCEL = 0x4
     GYRO = 0x5
     MAG = 0x6
+    VOLT = 0x7
 
 
 class Block(Protocol):
@@ -33,7 +34,7 @@ class PressureBlock:
     """
 
     time: int
-    pressure: int  # Pressure in Pascals
+    pressure: float  # Pressure in Pascals
 
     @classmethod
     def from_bytes(cls, data: bytes) -> Self:
@@ -57,7 +58,7 @@ class TemperatureBlock:
     """
 
     time: int
-    temperature: int  # Temperature in millidegrees Celsius
+    temperature: float  # Temperature in degrees Celsius
 
     @classmethod
     def from_bytes(cls, data: bytes) -> Self:
@@ -67,7 +68,7 @@ class TemperatureBlock:
 
         return cls(
             time=time,
-            temperature=temperature,
+            temperature=temperature / 1000,
         )
 
     def size(self) -> int:
@@ -81,7 +82,7 @@ class AltitudeBlock:
     """
 
     time: int
-    altitude: int  # Altitude above sea level in cm
+    altitude: float  # Altitude above sea level in m
 
     @classmethod
     def from_bytes(cls, data: bytes) -> Self:
@@ -91,7 +92,7 @@ class AltitudeBlock:
 
         return cls(
             time=time,
-            altitude=altitude,
+            altitude=altitude / 100,
         )
 
     def size(self) -> int:
@@ -105,9 +106,9 @@ class AccelerationBlock:
     """
 
     time: int
-    x: int  # Acceleration in X in cm/s^2
-    y: int  # Acceleration in Y in cm/s^2
-    z: int  # Acceleration in Z in cm/s^2
+    x: float  # Acceleration in X in m/s^2
+    y: float  # Acceleration in Y in m/s^2
+    z: float  # Acceleration in Z in m/s^2
 
     @classmethod
     def from_bytes(cls, data: bytes) -> Self:
@@ -117,9 +118,9 @@ class AccelerationBlock:
 
         return cls(
             time=time,
-            x=x,
-            y=y,
-            z=z,
+            x=x / 100,
+            y=y / 100,
+            z=z / 100,
         )
 
     def size(self) -> int:
@@ -133,9 +134,9 @@ class GyroBlock:
     """
 
     time: int
-    x: int  # Angular velocity in X in 0.1dps
-    y: int  # Angular velocity in Y in 0.1dps
-    z: int  # Angular velocity in Z in 0.1dps
+    x: float  # Angular velocity in X in dps
+    y: float  # Angular velocity in Y in dps
+    z: float  # Angular velocity in Z in dps
 
     @classmethod
     def from_bytes(cls, data: bytes) -> Self:
@@ -145,9 +146,9 @@ class GyroBlock:
 
         return cls(
             time=time,
-            x=x,
-            y=y,
-            z=z,
+            x=x / 10,
+            y=y / 10,
+            z=z / 10,
         )
 
     def size(self) -> int:
@@ -161,9 +162,9 @@ class MagBlock:
     """
 
     time: int
-    x: int  # Magnetic field in X in 0.1dps
-    y: int  # Magnetic field in Y in 0.1dps
-    z: int  # Magnetic field in Z in 0.1dps
+    x: float  # Magnetic field in X in micro Teslas
+    y: float  # Magnetic field in Y in micro Teslas
+    z: float  # Magnetic field in Z in micro Teslas
 
     @classmethod
     def from_bytes(cls, data: bytes) -> Self:
@@ -173,13 +174,34 @@ class MagBlock:
 
         return cls(
             time=time,
-            x=x,
-            y=y,
-            z=z,
+            x=x / 10,
+            y=y / 10,
+            z=z / 10,
         )
 
     def size(self) -> int:
         return 10
+
+
+@dataclass
+class BatteryBlock:
+    """
+    Represents a battery voltage block containing battery voltage data.
+    """
+
+    time: int
+    voltage: float  # Battery voltage in volts
+
+    @classmethod
+    def from_bytes(cls, data: bytes) -> Self:
+        """Constructs a battery voltage data block from bytes."""
+
+        time, voltage = struct.unpack("<IH", data[:6])
+
+        return cls(time=time, voltage=voltage / 1000)
+
+    def size(self) -> int:
+        return 6
 
 
 class PacketParser:
@@ -214,6 +236,8 @@ class PacketParser:
                 block = GyroBlock.from_bytes(self._packet)
             case BlockType.MAG:
                 block = MagBlock.from_bytes(self._packet)
+            case BlockType.VOLT:
+                block = BatteryBlock.from_bytes(self._packet)
             case _:
                 raise ValueError("Block type not implemented")
 
