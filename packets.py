@@ -203,6 +203,28 @@ class BatteryBlock:
     def size(self) -> int:
         return 6
 
+@dataclass
+class CoordBlock:
+    """
+    Represents a coordinate block containing GPS coordinate data.
+    """
+
+    time: int
+    latitude: float # Degrees
+    longitude: float # Degrees
+
+    @classmethod
+    def from_bytes(cls, data: bytes) -> Self:
+        """Constructs a GPS coordinate block from bytes."""
+
+        time, lat, lon = struct.unpack("<Iii", data[:12])
+
+        # Data converted from 0.1 microdegrees to degrees
+        return cls(time=time, latitude=lat / 1e6, longitude=lon / 1e6)
+
+    def size(self) -> int:
+        return 12
+
 
 class PacketParser:
     """Parses a packet into its blocks. Intended to be iterated over."""
@@ -238,6 +260,8 @@ class PacketParser:
                 block = MagBlock.from_bytes(self._packet)
             case BlockType.VOLT:
                 block = BatteryBlock.from_bytes(self._packet)
+            case BlockType.COORDS:
+                block = CoordBlock.from_bytes(self._packet)
             case _:
                 raise ValueError("Block type not implemented")
 
